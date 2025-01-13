@@ -1,0 +1,129 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Statistics
+{% endblock %}
+
+{% block content %}
+    <h2>Task Statistics</h2>
+
+    {% if total_tasks > 0 %}
+
+        <div class="container mt-4" id="statistics">
+            <!-- Overall Completion Rate (Pie Chart) -->
+            <h4>Completed vs. Incomplete Tasks</h4>
+            <canvas id="completionChart"></canvas>
+
+            <!-- Daily Completion (Bar Chart) -->
+            <h4>Daily Completion Rates</h4>
+            <canvas id="dailyCompletionChart"></canvas>
+
+            <!-- Monthly Completion (Line Chart) -->
+            <h4>Monthly Completion Rates</h4>
+            <canvas id="monthlyCompletionChart"></canvas>
+        </div>
+
+    {% else %}
+        <p class="text-muted">No tasks added to display statistics.</p>
+    {% endif %}
+
+    <script>
+        var ctx = document.getElementById('completionChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                // Chart labels
+                labels: ['Completed Tasks', 'Incomplete Tasks'],
+                datasets: [{
+                    label: 'Tasks',
+                    // Data from app.py
+                    data: [{{ completed_tasks }}, {{ total_tasks - completed_tasks }}],
+                    // Blue for completed, pink for incomplete
+                    backgroundColor: ['#067FD0', '#F64A8A'],
+                    borderWidth: 1,
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+
+        var ctx = document.getElementById('dailyCompletionChart').getContext('2d');
+        var dailyCompletionChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                // Dates from app.py
+                labels: {{ dates | tojson }},
+                datasets: [{
+                    label: 'Daily Completion Rate (%)',
+                    // Completion rates from app.py
+                    data: {{ completion_rates | tojson }},
+                    // Blue color for the bars
+                    backgroundColor: '#067FD0',
+                    borderColor: '#067FD0',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            stepSize: 20,
+                            precision: 0,
+                            autoSkip: false,
+                            callback: function(value) {
+                                return value + "%";
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+
+        var ctx3 = document.getElementById('monthlyCompletionChart').getContext('2d');
+        var monthlyCompletionChart = new Chart(ctx3, {
+            type: 'line',
+            data: {
+                labels: {{ months | tojson }},
+                datasets: [{
+                    label: 'Monthly Completion Rate (%)',
+                    data: {{ monthly_completion_rates | tojson }},
+                    borderColor: '#067FD0',
+                    backgroundColor: 'rgba(6, 127, 208, 0.2)',
+                    fill: true,
+                    tension: 0.2,
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock %}

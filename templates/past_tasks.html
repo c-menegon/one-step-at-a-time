@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Past Tasks
+{% endblock %}
+
+{% block content %}
+    <h2>Past Tasks</h2>
+
+    {% if past_tasks %}
+        <ul class="list-group mb-4">
+            {% for task in past_tasks %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        {% if task.completed %}
+                            <del>{{ task.description }}</del>
+                            <small class="date text-muted">({{ task.formatted_due_date }})</small>
+                        {% else %}
+                            {{ task.description }}
+                            <small class="date text-muted">({{ task.formatted_due_date }})</small>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">No past tasks to display.</p>
+    {% endif %}
+{% endblock %}
